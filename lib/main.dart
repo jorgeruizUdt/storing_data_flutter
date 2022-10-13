@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -51,6 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _readFromStorage() async {
     _usernameController.text = await _storage.read(key: "KEY_USERNAME") ?? '';
     _passwordController.text = await _storage.read(key: "KEY_PASSWORD") ?? '';
+
+    log(_usernameController.text);
+    log(_passwordController.text);
   }
 
   _onFormSubmit() async {
@@ -63,7 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  _onForgotPassword() {}
+  _onForgotPassword() {
+    _readFromStorage();
+  }
 
   _onSignUp() {}
 
