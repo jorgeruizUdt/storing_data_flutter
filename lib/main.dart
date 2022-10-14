@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:crud_store_data_and_passw/storage_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -33,58 +34,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-   static const Color primaryColor = Color(0xFF13B5A2);
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-   // Create storage
-  final _storage = const FlutterSecureStorage();
-
-  final TextEditingController _usernameController =
-      TextEditingController(text: "");
-  final TextEditingController _passwordController =
-      TextEditingController(text: "");
-
-  bool passwordHidden = true;
-  bool _savePassword = true;
-
-  // Read values
-  Future<void> _readFromStorage() async {
-    _usernameController.text = await _storage.read(key: "KEY_USERNAME") ?? '';
-    _passwordController.text = await _storage.read(key: "KEY_PASSWORD") ?? '';
-
-    log(_usernameController.text);
-    log(_passwordController.text);
-  }
-
-  _onFormSubmit() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (_savePassword) {
-        // Write values
-        await _storage.write(key: "KEY_USERNAME", value: _usernameController.text);
-        await _storage.write(key: "KEY_PASSWORD", value: _passwordController.text);
-      }
-    }
-  }
-
-  _onForgotPassword() {
-    _readFromStorage();
-  }
-
-  _onSignUp() {}
+  static const Color primaryColor = Color.fromARGB(255, 57, 140, 250);
+  final StorageData storageData = StorageData();
 
   @override
   void initState() {
     super.initState();
-    _readFromStorage();
+    storageData.readFromStorage();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _usernameController.dispose();
-    _passwordController.dispose();
+    storageData.usernameController.dispose();
   }
 
   @override
@@ -93,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      key: _scaffoldKey,
+      key: storageData.scaffoldKey,
       body: SingleChildScrollView(
         child: Container(
           width: size.width,
@@ -114,20 +76,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontSize: 32),
               ),
               SizedBox(
-                height: size.height * .15,
+                height: size.height * .1,
               ),
               Form(
-                key: _formKey,
+                key: storageData.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextFormField(
                       decoration: InputDecoration(
-                        labelText: "Username",
+                        labelText: "Data to save",
                         labelStyle: const TextStyle(color: primaryColor),
                         focusedBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(0), borderSide: const BorderSide(color: primaryColor, width: 2),),
                       ),
-                      controller: _usernameController,
+                      controller: storageData.usernameController,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Required field';
@@ -138,110 +100,101 @@ class _MyHomePageState extends State<MyHomePage> {
                       textCapitalization: TextCapitalization.none,
                       keyboardType: TextInputType.emailAddress,
                     ),
-                    SizedBox(
-                      height: size.height * .02,
-                    ),
-                    TextFormField(
-                      textInputAction: TextInputAction.done,
-                      validator: (value) {
-                        return value!.isEmpty ? "Required field" : null;
-                      },
-                      decoration: InputDecoration(
-                        labelText: "Password",
-                        labelStyle: const TextStyle(color: Color(0xFF95989A)),
-                        focusedBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(0), borderSide: const BorderSide(color: primaryColor, width: 2),),
-                        suffixIcon: InkWell(
-                          onTap: () {
-                            setState(() {
-                              passwordHidden = !passwordHidden;
-                            });
-                          },
-                          child: Icon(
-                            passwordHidden
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            color: const Color(0xff747881),
-                            size: 23,
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: size.height * .07,
+              ),
+              Container(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: 
+                  MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: size.width * .3,
+                          child: ElevatedButton(
+                            onPressed: storageData.overWriteLast,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              textStyle: const TextStyle(fontSize: 15)
+                            ),
+                            child: const Text("Overwrite"),
                           ),
                         ),
-                      ),
-                      controller: _passwordController,
-                      obscureText: passwordHidden,
-                      enableSuggestions: false,
-                      toolbarOptions: const ToolbarOptions(
-                        copy: false,
-                        paste: false,
-                        cut: false,
-                        selectAll: false,
-                        //by default all are disabled 'false'
-                      ),
+                        SizedBox(
+                          width: size.width * .1,
+                        ),
+                        SizedBox(
+                          width: size.width * .3,
+                          child: ElevatedButton(
+                            onPressed: storageData.saveNew,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              textStyle: const TextStyle(fontSize: 15)
+                            ),
+                            child: const Text("Save new"),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: size.height * .1,
                     ),
                   ],
                 ),
               ),
               SizedBox(
-                height: size.height * .045,
+                height: size.height * .15,
               ),
-              CheckboxListTile(
-                value: _savePassword,
-                onChanged: (bool? newValue) {
-                  setState(() {
-                    _savePassword = newValue!;
-                  });
-                },
-                title: const Text("Remember me"),
-                activeColor: primaryColor,
-              ),
-              SizedBox(
-                height: size.height * .05,
-              ),
-              SizedBox(
-                width: size.width,
-                child: ElevatedButton(
-                  onPressed: _onFormSubmit,
-                  child: const Text("Sign In"),
-                  style: ElevatedButton.styleFrom(
-                    primary: primaryColor,
-                    textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+              Row(mainAxisAlignment: 
+                MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: InkWell(
+                      onTap: storageData.deleteLast,
+                      child: const Text(
+                        "Delete current",
+                        style: TextStyle(
+                          color: Colors.black54,
+                          decoration: TextDecoration.underline, 
+                          fontSize: 14.5
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(
-                height: size.height * .015,
-              ),
-              Center(
-                child: InkWell(
-                  onTap: _onForgotPassword,
-                  child: const Text(
-                    "Forgot password?",
-                    style: TextStyle(color: Colors.black54, fontSize: 14),
-                    textAlign: TextAlign.center,
+                  SizedBox(
+                      width: size.width * .03,
                   ),
-                ),
-              ),
-              SizedBox(
-                height: size.height * .035,
-              ),
-              const Center(
-                child: Text(
-                  "You don't have an account?",
-                  style: TextStyle(fontSize: 14, ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              SizedBox(
-                height: size.height * .01,
-              ),
-              Center(
-                child: InkWell(
-                  onTap: _onSignUp,
-                  child: const Text(
-                    "Sign Up now to get access.",
-                    style: TextStyle( color: primaryColor,fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
+                  const Text(
+                    "or",
+                    style: TextStyle(color: Colors.black54, fontSize: 11),
+                    textAlign: TextAlign.center
                   ),
-                ),
-              ),
+                  SizedBox(
+                      width: size.width * .03,
+                  ),
+                  Center(
+                    child: InkWell(
+                      onTap: storageData.deleteAll,
+                      child: const Text(
+                        "Delete all",
+                        style: TextStyle(
+                          color: Colors.black54,
+                          decoration: TextDecoration.underline, 
+                          fontSize: 14.5
+                          ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ),
