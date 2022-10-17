@@ -16,26 +16,30 @@ class StorageData {
 
   Future<String> readFromStorage() async {
     usernameController.text = (await _storage.read(key: firstKey)) ?? '';
-    log(usernameController.text);
     return usernameController.text;
   }
 
   Future<String> readFromStorageSec() async {
     String last = (await _storage.read(key: lastKey)) ?? '';
-    log(usernameController.text);
     return last;
   }
 
-  Future<void> readAllFromStorage() async {
-    String all = _storage.readAll().toString();
-    log(all);
+  Future<Map<String, String>> readAllFromStorage() async {
+    return _storage.readAll();
   }
 
   overWriteLast() async {
     String data = usernameController.text;
-    await _storage.write(key: firstKey, value: data);
-    lastKey = data;
-    await _storage.write(key: lastKey, value: lastKey);
+    
+    if (((await _storage.read(key: firstKey)) ?? '') == '') {
+      await _storage.write(key: firstKey, value: data);
+    } else if (((await _storage.read(key: firstKey)) ?? '') == '' && ((await _storage.read(key: lastKey)) ?? '') == '') {
+      await _storage.write(key: firstKey, value: data);
+    } else if (((await _storage.read(key: firstKey)) ?? '') != '' && ((await _storage.read(key: lastKey)) ?? '') == '') {
+      await _storage.write(key: firstKey, value: data);
+    } else {
+      await _storage.write(key: lastKey, value: data);
+    }
   }
 
   saveNew() async {
@@ -58,7 +62,6 @@ class StorageData {
   }
 
   deleteAll() {
-    readAllFromStorage();
     _storage.deleteAll();
   }
 }

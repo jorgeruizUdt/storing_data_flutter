@@ -36,11 +36,31 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const Color primaryColor = Color.fromARGB(255, 57, 140, 250);
   final StorageData storageData = StorageData();
+  Map<String, String>? dataMap;
+
+  Future<void> retrieve() async {
+    Future<Map<String, String>> data = storageData.readAllFromStorage();
+    Map<String, String>? result = await data;
+
+    setState(() { 
+      dataMap = result;
+
+      for(var v in dataMap!.values) {
+        log('Value: $v');
+      }
+
+      for(var v in dataMap!.keys) {
+        log('Key: $v');
+      }
+
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     storageData.readFromStorage();
+    //retrieve();
   }
 
   @override
@@ -143,7 +163,28 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                     ),
                     SizedBox(
-                      height: size.height * .1,
+                      height: size.height * .045,
+                    ),
+                    SizedBox(
+                      width: size.width * .3,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          retrieve();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          textStyle: const TextStyle(fontSize: 15)
+                        ),
+                        child: const Text(
+                          "View All",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 99, 99, 99)
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: size.height * .07,
                     ),
                   ],
                 ),
